@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/chinese-rocks');
+        @import url('https://fonts.cdnfonts.com/css/rdr-lino');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+        
+        #notification-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        @font-face {
+        font-family: 'DustWest';
+        src: url('DustWest.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        }
+        .notification {
+            background-image: url('nui://pure-notify/assets/backgroundtestnew.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            color: #880c0c;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            min-width: 370px;
+            max-width: 450px;
+            min-height: 70px;
+            max-height: 120px;
+            opacity: 85;
+            transform: translateX(100%);
+            transition: opacity 0.3s, transform 0.3s;
+            margin-bottom: 10px;
+            border: 0px solid #630808;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification i {
+            margin-right: 15px;
+            font-size: 24px;
+            color: #c17e3e;
+            text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+        }
+        
+        .notification-content {
+            flex-grow: 1;
+        }
+        
+        .notification-title {
+            font-family: 'DustWest';
+            font-weight: normal;
+            color: #ccccca;
+            margin-bottom: 1px;
+            font-size: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 2px rgba(49, 0, 0, 0.5);
+        }
+        
+        .notification-text {
+            font-family: 'DustWest';
+            color: #e0e0e0;
+            font-size: 25px;
+            text-transform: uppercase;
+            opacity: 1;
+            text-shadow: 1px 1px 1px rgba(49, 0, 0, 0.5);
+        }
+        
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.2), transparent);
+            pointer-events: none;
+        }
+        
+        .notification.info i { color: #ffffff; }
+        .notification.success i { color: #005807; }
+        .notification.warning i { color: #9e4904; }
+        .notification.error i { color: #470000; }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInRight 0.5s ease forwards;
+        }
+
+        .fade-out {
+            animation: fadeOutRight 0.5s ease forwards;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div id="notification-container"></div>
+    
+    <script>
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            
+            if (data.action === 'showNotification') {
+                createNotification(data);
+            } else if (data.action === 'removeNotification') {
+                removeNotification(data.id);
+            }
+        });
+        
+        function createNotification(data) {
+            const container = document.getElementById('notification-container');
+            
+            const notif = document.createElement('div');
+            notif.className = `notification ${data.type}`;
+            notif.id = `notification-${data.id}`;
+            
+            notif.innerHTML = `
+                <i class="fas ${data.icon}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${data.firstText}</div>
+                    <div class="notification-text">${data.secondText}</div>
+                </div>
+            `;
+            
+            container.appendChild(notif);
+            
+            // Trigger reflow
+            notif.offsetHeight;
+            
+            // Add show class for animation
+            notif.classList.add('fade-in');
+        }
+        
+        function removeNotification(id) {
+            const notif = document.getElementById(`notification-${id}`);
+            if (notif) {
+                notif.classList.remove('fade-in');
+                notif.classList.add('fade-out');
+                setTimeout(() => {
+                    if (notif.parentNode) {
+                        notif.parentNode.removeChild(notif);
+                    }
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
